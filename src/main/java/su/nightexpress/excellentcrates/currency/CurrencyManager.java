@@ -10,6 +10,7 @@ import su.nightexpress.excellentcrates.currency.handler.VaultEconomyHandler;
 import su.nightexpress.excellentcrates.currency.handler.PlayerXPHandler;
 import su.nightexpress.excellentcrates.currency.impl.CoinsEngineCurrency;
 import su.nightexpress.excellentcrates.currency.impl.ConfigCurrency;
+import su.nightexpress.excellentcrates.currency.impl.HeartsCurrencyHandler;
 import su.nightexpress.excellentcrates.hooks.HookId;
 import su.nightexpress.nightcore.config.FileConfig;
 import su.nightexpress.nightcore.integration.VaultHook;
@@ -41,6 +42,10 @@ public class CurrencyManager extends SimpleManager<CratesPlugin> {
         }
         if (Plugins.isInstalled(HookId.COINS_ENGINE)) {
             CoinsEngineCurrency.getCurrencies().forEach(this::registerCurrency);
+        }
+
+        if (Plugins.isInstalled("LifestealCore")) {
+            this.loadCurrency("hearts", HeartsCurrencyHandler::new);
         }
     }
 

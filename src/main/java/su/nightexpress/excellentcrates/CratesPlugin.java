@@ -1,5 +1,7 @@
 package su.nightexpress.excellentcrates;
 
+import dev.norska.lsc.LifestealCore;
+import dev.norska.lsc.api.LifestealCoreAPI;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import su.nightexpress.excellentcrates.command.basic.*;
@@ -41,6 +43,8 @@ public class CratesPlugin extends NightDataPlugin<CrateUser> {
 
     private HologramHandler hologramHandler;
     private CrateLogger     crateLogger;
+
+    public static LifestealCoreAPI lifeStealInstance;
 
     @Override
     @NotNull
@@ -87,6 +91,11 @@ public class CratesPlugin extends NightDataPlugin<CrateUser> {
 
         if (Plugins.hasPlaceholderAPI()) {
             PlaceholderHook.setup(this);
+        }
+
+        if (Plugins.isInstalled("LifestealCore")) {
+            this.info("LifestealCore installed... Enabling now.");
+            lifeStealInstance = new LifestealCoreAPI(new LifestealCore());
         }
     }
 
