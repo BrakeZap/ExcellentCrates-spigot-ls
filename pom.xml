@@ -15,6 +15,7 @@
     </properties>
 
     <repositories>
+
         <repository>
             <id>spigot-repo</id>
             <url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
@@ -53,14 +54,16 @@
             <version>1.20.4-R0.1-SNAPSHOT</version>
         </dependency>
         <dependency>
-            <groupId>su.nightexpress.nightcore</groupId>
-            <artifactId>nightcore</artifactId>
-            <version>2.5.2.1</version>
+            <groupId>com.github.nulli0n</groupId>
+            <artifactId>NightCore-spigot</artifactId>
+            <version>v2.5.2.1</version>
         </dependency>
         <dependency>
-            <groupId>su.nightexpress.coinsengine</groupId>
-            <artifactId>CoinsEngine</artifactId>
+            <groupId>com.github.nulli0n</groupId>
+            <artifactId>CoinsEngine-spigot</artifactId>
             <version>2.3.3</version>
+            <scope>system</scope>
+        <systemPath>${project.basedir}/resources/CoinsEngine-2.3.3.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>com.comphenix.protocol</groupId>
