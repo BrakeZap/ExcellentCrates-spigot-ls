@@ -79,6 +79,7 @@ public class Placeholders extends su.nightexpress.nightcore.util.Placeholders {
     public static final String CRATE_REWARDS_AMOUNT        = "%crate_rewards_amount%";
     public static final String CRATE_MILESTONES_AMOUNT     = "%crate_milestones_amount%";
     public static final String CRATE_MILESTONES_REPEATABLE = "%crate_milestones_repeatable%";
+    public static final String CRATE_IS_HEART_CRATE        = "%crate_is_heart_crate%";
 
     public static final String CRATE_INSPECT = "%crate_inspect%";
 
@@ -191,6 +192,7 @@ public class Placeholders extends su.nightexpress.nightcore.util.Placeholders {
             .add(CRATE_KEYS, () -> {
                 return crate.getKeys().stream().map(key -> good(key.getName())).collect(Collectors.joining("\n"));
             })
+                .add(CRATE_IS_HEART_CRATE, () -> CoreLang.getEnabledOrDisabled(crate.isHeartCrate()))
             .add(CRATE_PUSHBACK_ENABLED, () -> CoreLang.getEnabledOrDisabled(crate.isPushbackEnabled()))
             .add(CRATE_HOLOGRAM_ENABLED, () -> CoreLang.getEnabledOrDisabled(crate.isHologramEnabled()))
             .add(CRATE_HOLOGRAM_TEMPLATE, () -> {

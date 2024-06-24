@@ -31,6 +31,13 @@ public class EditorLang {
     public static final LangItem CRATE_CREATE = builder(PREFIX + "Crate.Create")
         .name("New Crate").build();
 
+    public static final LangItem IS_HEART_CRATE = builder(PREFIX + "Crate.IsHeartCrate")
+            .name("Is a Heart Crate")
+            .current("Enabled", CRATE_IS_HEART_CRATE)
+            .emptyLine()
+            .click("toggle")
+            .build();
+
     public static final LangItem CRATE_DISPLAY_NAME = builder(PREFIX + "Crate.DisplayName")
         .name("Display Name")
         .current("Current", CRATE_NAME)

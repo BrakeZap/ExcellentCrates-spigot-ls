@@ -46,8 +46,9 @@ public class CrateMainEditor extends EditorMenu<CratesPlugin, Crate> implements 
             });
         });
 
-        this.addItem(Material.STICK, EditorLang.CRATE_EFFECTS, 3, (viewer, event, crate) -> {
+        this.addItem(Material.STICK, EditorLang.IS_HEART_CRATE, 3, (viewer, event, crate) -> {
             crate.setIsHeartCrate(!crate.isHeartCrate());
+            this.saveSettings(viewer, crate, true);
         });
 
         this.addItem(Material.ITEM_FRAME, EditorLang.CRATE_ITEM, 4, (viewer, event, crate) -> {

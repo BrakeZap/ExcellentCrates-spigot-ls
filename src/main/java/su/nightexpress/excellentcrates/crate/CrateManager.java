@@ -1,14 +1,15 @@
 package su.nightexpress.excellentcrates.crate;
 
-import org.bukkit.Color;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.World;
+import org.bukkit.*;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Player;
+import org.bukkit.event.block.Action;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
+import org.checkerframework.checker.units.qual.C;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import su.nightexpress.excellentcrates.CratesPlugin;
@@ -34,11 +35,14 @@ import su.nightexpress.excellentcrates.key.CrateKey;
 import su.nightexpress.excellentcrates.opening.impl.BasicOpening;
 import su.nightexpress.excellentcrates.util.InteractType;
 import su.nightexpress.nightcore.config.FileConfig;
+import su.nightexpress.nightcore.language.entry.LangItem;
 import su.nightexpress.nightcore.manager.AbstractManager;
 import su.nightexpress.nightcore.menu.MenuOptions;
 import su.nightexpress.nightcore.menu.MenuViewer;
+import su.nightexpress.nightcore.menu.click.ClickAction;
 import su.nightexpress.nightcore.menu.impl.AbstractMenu;
 import su.nightexpress.nightcore.menu.impl.ConfigMenu;
+import su.nightexpress.nightcore.menu.item.ItemHandler;
 import su.nightexpress.nightcore.menu.item.MenuItem;
 import su.nightexpress.nightcore.util.*;
 import su.nightexpress.nightcore.util.random.Rnd;
@@ -440,14 +444,35 @@ public class CrateManager extends AbstractManager<CratesPlugin> {
 
     public static class HeartsMenu extends AbstractMenu<CratesPlugin> {
 
-        public HeartsMenu(@NotNull CratesPlugin plugin) {
-            super(plugin, "&4Choose amount...", 21);
-            MenuItem test1 = new MenuItem(new ItemStack(Material.DIRT));
-            test1.setHandler((viewer, event) -> {
-                viewer.getPlayer().sendMessage("test123");
+        public HeartsMenu(@NotNull CratesPlugin plugin, Crate crate) {
+            super(plugin, "&4&lChoose amount...", 27);
+            ItemStack placeholderStack = new ItemStack(Material.BLACK_STAINED_GLASS_PANE);
+            ItemUtil.editMeta(placeholderStack, (meta) -> {
+                meta.setDisplayName(" ");
             });
-            test1.setSlots(3);
-            this.addItem(test1);
+            MenuItem placeholder = new MenuItem(placeholderStack);
+            placeholder.setSlots(0,1,2,3,4,5,6,7,8,9,10,16,17,18,19,20,21,22,23,24,25,26);
+            this.addItem(placeholder);
+
+            for (int i = 1; i < 6; i++) {
+                ItemStack sacrificeStack = new ItemStack(Material.RED_DYE);
+                int finalI = i;
+                ClickAction action = (viewer, event) -> {
+                    CratesPlugin.lifeStealInstance.removePlayerHearts(viewer.getPlayer().getUniqueId(), finalI, false);
+                    this.runNextTick(viewer.getPlayer()::closeInventory);
+                    assert crate != null;
+                    CrateSource cs = new CrateSource(crate);
+                    plugin.getCrateManager().openCrateNoKey(viewer.getPlayer(), cs, new OpenSettings().setSkipAnimation(false).setSaveData(false));
+                };
+                ItemUtil.editMeta(sacrificeStack, (meta -> {
+                    meta.setDisplayName(ChatColor.translateAlternateColorCodes('&', "&4&lSACRIFICE " + finalI + " HEARTS"));
+                }));
+                MenuItem sacItem = new MenuItem(sacrificeStack);
+                sacItem.setSlots(10+finalI);
+                sacItem.setHandler(action);
+                this.addItem(sacItem);
+            }
+
         }
 
         @Override
@@ -487,7 +512,7 @@ public class CrateManager extends AbstractManager<CratesPlugin> {
             }
 
             //Create and open choose hearts menu
-            new HeartsMenu(plugin).open(player);
+            new HeartsMenu(plugin, crate).open(player);
             return;
         }
 
@@ -608,6 +633,85 @@ public class CrateManager extends AbstractManager<CratesPlugin> {
             if (crate.isKeyRequired()) {
                 /*key = */this.plugin.getKeyManager().takeKey(player, crate);
             }
+
+            // Take crate item stack
+            ItemStack item = source.getItem();
+            if (item != null) {
+                item.setAmount(item.getAmount() - 1);
+            }
+        }
+
+        return true;
+    }
+
+    public boolean openCrateNoKey(@NotNull Player player, @NotNull CrateSource source, @NotNull OpenSettings settings) {
+        Opening openingData = this.plugin.getOpeningManager().getOpeningData(player);
+        if (openingData != null && !openingData.isCompleted()) {
+            return false;
+        }
+
+        Crate crate = source.getCrate();
+
+        // Stop mass open (mostly only this case) if crate itemstack is out.
+        if (source.getItem() != null && source.getItem().getAmount() <= 0) {
+            return false;
+        }
+
+        if (!settings.isForce() && !crate.hasPermission(player)) {
+            Lang.ERROR_NO_PERMISSION.getMessage(plugin).send(player);
+            return false;
+        }
+
+        if (!settings.isForce() && player.getInventory().firstEmpty() == -1) {
+            Lang.CRATE_OPEN_ERROR_INVENTORY_SPACE.getMessage().replace(crate.replacePlaceholders()).send(player);
+            return false;
+        }
+
+        CrateUser user = plugin.getUserManager().getUserData(player);
+        if (!settings.isForce() && user.isCrateOnCooldown(crate)) {
+            long expireDate = user.getCrateCooldown(crate);
+            (expireDate < 0 ? Lang.CRATE_OPEN_ERROR_COOLDOWN_ONE_TIMED : Lang.CRATE_OPEN_ERROR_COOLDOWN_TEMPORARY).getMessage()
+                    .replace(Placeholders.GENERIC_TIME, TimeUtil.formatDuration(expireDate))
+                    .replace(crate.replacePlaceholders())
+                    .send(player);
+            return false;
+        }
+
+        if (!settings.isForce() && !crate.hasCostBypassPermisssion(player)) {
+            for (var entry : crate.getOpenCostMap().entrySet()) {
+                Currency currency = entry.getKey();
+                double amount = entry.getValue();
+                if (currency.getHandler().getBalance(player) < amount) {
+                    Lang.CRATE_OPEN_ERROR_CANT_AFFORD.getMessage()
+                            .replace(Placeholders.GENERIC_AMOUNT, currency.format(amount))
+                            .replace(crate.replacePlaceholders()).send(player);
+                    return false;
+                }
+            }
+        }
+
+        if (crate.getRewards(player).isEmpty()) {
+            Lang.CRATE_OPEN_ERROR_NO_REWARDS.getMessage().replace(crate.replacePlaceholders()).send(player);
+            return false;
+        }
+
+        CrateOpenEvent openEvent = new CrateOpenEvent(crate, player);
+        plugin.getPluginManager().callEvent(openEvent);
+        if (openEvent.isCancelled()) return false;
+
+
+        Opening opening = this.plugin.getOpeningManager().createOpening(player, source, null);
+        opening.setRefundable(!settings.isForce());
+        opening.setSaveData(settings.isSaveData());
+
+        if (!this.plugin.getOpeningManager().startOpening(player, opening, settings.isSkipAnimation())) {
+            //this.plugin.getOpeningManager().stopOpening(player);
+            return false;
+        }
+
+        if (!settings.isForce()) {
+            // Take costs
+            crate.getOpenCostMap().forEach((currency, amount) -> currency.getHandler().take(player, amount));
 
             // Take crate item stack
             ItemStack item = source.getItem();

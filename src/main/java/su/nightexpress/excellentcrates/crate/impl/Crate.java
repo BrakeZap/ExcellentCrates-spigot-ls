@@ -28,6 +28,7 @@ import su.nightexpress.nightcore.util.wrapper.UniParticle;
 
 import java.io.File;
 import java.util.*;
+import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -106,7 +107,8 @@ public class Crate extends AbstractFileData<CratesPlugin> implements Placeholder
 
             this.setOpenCost(currency, amount);
         }
-
+        this.setIsHeartCrate(ConfigValue.create("Crate.IsHeartCrate", true,
+                "Sets whether or not the crate behaves as a heart crate").read(config));
         this.setKeyRequired(ConfigValue.create("Key.Required",
             true,
             "Sets whether or not keys are required to open this crate."
