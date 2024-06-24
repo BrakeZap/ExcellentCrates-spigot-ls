@@ -23,7 +23,7 @@ public class HeartsCurrencyHandler implements CurrencyHandler {
 
     @Override
     public void take(@NotNull Player player, double amount) {
-        CratesPlugin.lifeStealInstance.removePlayerHearts(player.getUniqueId(), (int) amount, true);
+        CratesPlugin.lifeStealInstance.removePlayerHearts(player.getUniqueId(), (int) amount, false);
     }
 
     @Override
