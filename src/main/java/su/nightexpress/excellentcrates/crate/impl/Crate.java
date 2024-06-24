@@ -59,6 +59,7 @@ public class Crate extends AbstractFileData<CratesPlugin> implements Placeholder
     private UniParticle effectParticle;
     private String      lastOpener;
     private String      lastReward;
+    private boolean     isHeartCrate;
 
     public Crate(@NotNull CratesPlugin plugin, @NotNull File file) {
         super(plugin, file);
@@ -69,6 +70,7 @@ public class Crate extends AbstractFileData<CratesPlugin> implements Placeholder
         this.milestones = new HashSet<>();
         this.placeholderMap = Placeholders.forCrate(this);
         this.placeholderFullMap = Placeholders.forCrateAll(this);
+        this.isHeartCrate = false;
     }
 
     @Override
@@ -278,6 +280,14 @@ public class Crate extends AbstractFileData<CratesPlugin> implements Placeholder
     public void updateHologram() {
         this.removeHologram();
         this.createHologram();
+    }
+
+    public void setIsHeartCrate(boolean val) {
+        this.isHeartCrate = val;
+    }
+
+    public boolean isHeartCrate() {
+        return this.isHeartCrate;
     }
 
     public boolean hasRewards() {

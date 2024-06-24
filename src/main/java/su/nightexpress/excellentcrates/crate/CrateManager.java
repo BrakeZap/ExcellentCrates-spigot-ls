@@ -2,9 +2,11 @@ package su.nightexpress.excellentcrates.crate;
 
 import org.bukkit.Color;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
@@ -33,7 +35,11 @@ import su.nightexpress.excellentcrates.opening.impl.BasicOpening;
 import su.nightexpress.excellentcrates.util.InteractType;
 import su.nightexpress.nightcore.config.FileConfig;
 import su.nightexpress.nightcore.manager.AbstractManager;
+import su.nightexpress.nightcore.menu.MenuOptions;
+import su.nightexpress.nightcore.menu.MenuViewer;
+import su.nightexpress.nightcore.menu.impl.AbstractMenu;
 import su.nightexpress.nightcore.menu.impl.ConfigMenu;
+import su.nightexpress.nightcore.menu.item.MenuItem;
 import su.nightexpress.nightcore.util.*;
 import su.nightexpress.nightcore.util.random.Rnd;
 import su.nightexpress.nightcore.util.text.tag.Tags;
@@ -432,6 +438,35 @@ public class CrateManager extends AbstractManager<CratesPlugin> {
         menu.open(player, source);
     }
 
+    public static class HeartsMenu extends AbstractMenu<CratesPlugin> {
+
+        public HeartsMenu(@NotNull CratesPlugin plugin) {
+            super(plugin, "&4Choose amount...", 21);
+            MenuItem test1 = new MenuItem(new ItemStack(Material.DIRT));
+            test1.setHandler((viewer, event) -> {
+                viewer.getPlayer().sendMessage("test123");
+            });
+            test1.setSlots(3);
+            this.addItem(test1);
+        }
+
+        @Override
+        public boolean isPersistent() {
+            return false;
+        }
+
+
+        @Override
+        protected void onPrepare(@NotNull MenuViewer menuViewer, @NotNull MenuOptions menuOptions) {
+
+        }
+
+        @Override
+        protected void onReady(@NotNull MenuViewer menuViewer, @NotNull Inventory inventory) {
+
+        }
+    }
+
     public void interactCrate(@NotNull Player player, @NotNull Crate crate, @NotNull InteractType action, @Nullable ItemStack item, @Nullable Block block) {
         player.closeInventory();
 
@@ -439,6 +474,20 @@ public class CrateManager extends AbstractManager<CratesPlugin> {
 
         if (action == InteractType.CRATE_PREVIEW) {
             this.previewCrate(player, source);
+            return;
+        }
+
+        if (crate.isHeartCrate() && player.getInventory().getItemInMainHand().getType() == Material.AIR) {
+
+            //Check if player has more than 15 hearts
+            int hearts = CratesPlugin.lifeStealInstance.getPlayerHearts(player.getUniqueId());
+            if (hearts < 15) {
+                Players.sendModernMessage(player, "&4&lYou only have " + hearts + " hearts. " +"You need at least 15 hearts to sacrifice!");
+                return;
+            }
+
+            //Create and open choose hearts menu
+            new HeartsMenu(plugin).open(player);
             return;
         }
 

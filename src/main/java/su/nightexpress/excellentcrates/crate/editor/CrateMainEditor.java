@@ -12,6 +12,7 @@ import su.nightexpress.excellentcrates.config.EditorLang;
 import su.nightexpress.excellentcrates.config.Lang;
 import su.nightexpress.excellentcrates.crate.impl.Crate;
 import su.nightexpress.excellentcrates.key.CrateKey;
+import su.nightexpress.nightcore.core.CoreLang;
 import su.nightexpress.nightcore.menu.MenuOptions;
 import su.nightexpress.nightcore.menu.MenuViewer;
 import su.nightexpress.nightcore.menu.click.ClickResult;
@@ -43,6 +44,10 @@ public class CrateMainEditor extends EditorMenu<CratesPlugin, Crate> implements 
                 this.saveSettings(viewer, crate, false);
                 return true;
             });
+        });
+
+        this.addItem(Material.STICK, EditorLang.CRATE_EFFECTS, 3, (viewer, event, crate) -> {
+            crate.setIsHeartCrate(!crate.isHeartCrate());
         });
 
         this.addItem(Material.ITEM_FRAME, EditorLang.CRATE_ITEM, 4, (viewer, event, crate) -> {
