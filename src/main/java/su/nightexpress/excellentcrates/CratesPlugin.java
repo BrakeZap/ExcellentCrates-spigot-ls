@@ -94,7 +94,7 @@ public class CratesPlugin extends NightDataPlugin<CrateUser> {
         }
 
         if (Plugins.isInstalled("LifestealCore")) {
-            this.info("LifestealCore installed... Enabling now.");
+            this.info("[Excellent Crates] LifestealCore installed. Enabling now...");
             lifeStealInstance = new LifestealCoreAPI(LifestealCore.getInstance());
         }
     }

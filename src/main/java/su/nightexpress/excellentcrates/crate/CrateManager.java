@@ -442,6 +442,8 @@ public class CrateManager extends AbstractManager<CratesPlugin> {
         menu.open(player, source);
     }
 
+
+
     public static class HeartsMenu extends AbstractMenu<CratesPlugin> {
 
         public HeartsMenu(@NotNull CratesPlugin plugin, Crate crate) {
@@ -458,11 +460,21 @@ public class CrateManager extends AbstractManager<CratesPlugin> {
                 ItemStack sacrificeStack = new ItemStack(Material.RED_DYE);
                 int finalI = i;
                 ClickAction action = (viewer, event) -> {
-                    CratesPlugin.lifeStealInstance.removePlayerHearts(viewer.getPlayer().getUniqueId(), finalI, false);
-                    this.runNextTick(viewer.getPlayer()::closeInventory);
+                    Player p = viewer.getPlayer();
+                    int keysToGive = finalI - 1;
+                    if (keysToGive > 0 && !crate.getKeys().isEmpty()) {
+                        if (countEmptySlots(p) < 2){
+                            Lang.CRATE_OPEN_ERROR_INVENTORY_SPACE.getMessage().replace(crate.replacePlaceholders()).send(p);
+                            return;
+                        }
+                        CrateKey key = crate.getKeys().stream().toList().get(0);
+                        Players.addItem(p, key.getItem(), keysToGive);
+                    }
+                    CratesPlugin.lifeStealInstance.removePlayerHearts(p.getUniqueId(), finalI, false);
+                    this.runNextTick(p::closeInventory);
                     assert crate != null;
                     CrateSource cs = new CrateSource(crate);
-                    plugin.getCrateManager().openCrateNoKey(viewer.getPlayer(), cs, new OpenSettings().setSkipAnimation(false).setSaveData(false));
+                    plugin.getCrateManager().openCrateNoKey(p, cs, new OpenSettings().setSkipAnimation(false).setSaveData(false));
                 };
                 ItemUtil.editMeta(sacrificeStack, (meta -> {
                     meta.setDisplayName(ChatColor.translateAlternateColorCodes('&', "&4&lSACRIFICE " + finalI + " HEARTS"));
@@ -473,6 +485,15 @@ public class CrateManager extends AbstractManager<CratesPlugin> {
                 this.addItem(sacItem);
             }
 
+        }
+
+        private int countEmptySlots(Player p) {
+            int count = 0;
+            for (int i = 0; i < 36; i++) {
+                ItemStack item = p.getInventory().getItem(i);
+                if (item == null || item.getType() == Material.AIR) count++;
+            }
+            return count;
         }
 
         @Override

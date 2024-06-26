@@ -62,7 +62,6 @@ public class CrateListener extends AbstractListener<CratesPlugin> {
 
     @EventHandler(priority = EventPriority.HIGH)
     public void onCrateUse(PlayerInteractEvent event) {
-        Bukkit.getConsoleSender().sendMessage("Event Sent!");
         Player player = event.getPlayer();
         ItemStack item = event.getItem();
         Block block = null;
@@ -75,18 +74,14 @@ public class CrateListener extends AbstractListener<CratesPlugin> {
             item = null;
             block = event.getClickedBlock();
             if (block == null) {
-                Bukkit.getConsoleSender().sendMessage("Block is null!");
                 return;
             }
 
             crate = this.crateManager.getCrateByBlock(block);
         }
         if (crate == null) {
-            Bukkit.getConsoleSender().sendMessage("Crate is null!");
             return;
         }
-
-        Bukkit.getConsoleSender().sendMessage("Found crate!");
 
         event.setUseItemInHand(Event.Result.DENY);
         event.setUseInteractedBlock(Event.Result.DENY);
