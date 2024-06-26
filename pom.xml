@@ -56,7 +56,7 @@
         <dependency>
             <groupId>com.github.nulli0n</groupId>
             <artifactId>NightCore-spigot</artifactId>
-            <version>v2.5.2.1</version>
+            <version>v2.6.2-beta</version>
         </dependency>
         <dependency>
             <groupId>com.github.nulli0n</groupId>

@@ -71,7 +71,6 @@ public class Crate extends AbstractFileData<CratesPlugin> implements Placeholder
         this.milestones = new HashSet<>();
         this.placeholderMap = Placeholders.forCrate(this);
         this.placeholderFullMap = Placeholders.forCrateAll(this);
-        this.isHeartCrate = false;
     }
 
     @Override
@@ -107,7 +106,7 @@ public class Crate extends AbstractFileData<CratesPlugin> implements Placeholder
 
             this.setOpenCost(currency, amount);
         }
-        this.setIsHeartCrate(ConfigValue.create("Crate.IsHeartCrate", true,
+        this.setIsHeartCrate(ConfigValue.create("Crate.IsHeartCrate", false,
                 "Sets whether or not the crate behaves as a heart crate").read(config));
         this.setKeyRequired(ConfigValue.create("Key.Required",
             true,
